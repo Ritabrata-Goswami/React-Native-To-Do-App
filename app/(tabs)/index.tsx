@@ -16,12 +16,14 @@ const Stack = createStackNavigator();
 
 const Routes=()=>{
   const [getAuthentication, setAuthentication] = useState(false);
+  const [loading, setLoading] = useState(true); 
 
   useEffect(()=>{
     const RouteAuthenticate =async()=>{
-      const token = await AsyncStorage.multiGet(['Id', 'Name', 'Photo', 'profilePicPath']);
   
       try{
+        const token = await AsyncStorage.multiGet(['Id', 'Name', 'Photo', 'profilePicPath']);
+        
         const userId = token[0][1];
         const userName = token[1][1];
         const userPhoto = token[2][1];
@@ -36,23 +38,31 @@ const Routes=()=>{
         Alert.alert("Authentication process failed!");
         console.log(exce);
         setAuthentication(false);
+      }finally{
+        setLoading(false);
       }
     }
   
     RouteAuthenticate();
   },[]);
 
+
+  if (loading === true){
+                      // Render a loading screen or nothing while authentication is being checked
+    return <Text style={{textAlign:"center", marginTop:60, fontSize:20, fontWeight:"bold"}}>Loading...</Text>;
+  }
+
+
   return(
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName={getAuthentication ? "Dashboard" : "Login"}>
         <Stack.Screen name="Registration" component={Registration} options={{headerShown:false}}></Stack.Screen>
         <Stack.Screen name="Login" component={Login} options={{headerShown:false}}></Stack.Screen>
+        <Stack.Screen name="Dashboard" component={Dashboard} options={{headerShown:false}}></Stack.Screen>
 
         {getAuthentication && (
           <>
-            <Stack.Screen name="Dashboard" component={Dashboard} options={{headerShown:false}}></Stack.Screen>
             <Stack.Screen name="Form" component={Form} options={{headerShown:false}}></Stack.Screen>
             <Stack.Screen name="Display" component={Display} options={{headerShown:false}}></Stack.Screen>
-            {/* <Stack.Screen name="Entry" component={Entry} options={{headerShown:false}}></Stack.Screen> */}
           </>
         )}
         
